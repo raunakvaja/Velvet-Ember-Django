@@ -1,0 +1,8 @@
+{% extends 'base.html' %}{% load static %}
+{% block title %}Our Story | Velvet Ember{% endblock %}
+{% block body_class %}inner-page story-page{% endblock %}
+{% block content %}
+<section class="shell page-intro"><p class="eyebrow">AN EVENING, IMAGINED</p><h1>A little elegance. <em>A little ember.</em></h1><p>A fictional restaurant identity built around the pleasure of a beautifully considered meal.</p></section>
+<section class="shell story-grid"><img class="story-photo" src="{% static 'images/chicken.webp' %}" alt="Herb-roasted chicken with potatoes and greens" width="900" height="600"><div class="story-copy"><p class="eyebrow">THE VELVET EMBER IDEA</p><h2>Familiar flavours.<br><em>A richer mood.</em></h2><p>Velvet Ember pairs the comfort of a modern bistro with burgundy textures, candlelit photography, and an unhurried sense of occasion.</p><p>This website is a demonstration project. The restaurant, menu, prices, and photographs are illustrative. You can browse dishes and build a demo order without entering payment details.</p><a class="button primary" href="{% url 'menu' %}">Find your favourite →</a></div></section>
+<section class="shell values-grid"><article><span>01</span><h3>Thoughtful details</h3><p>Warm colour, expressive typography, and food photography that sets the scene.</p></article><article><span>02</span><h3>A clear journey</h3><p>From choosing a dish to reviewing a demo bag, every step stays simple.</p></article><article><span>03</span><h3>Honest by design</h3><p>No invented awards, ratings, discounts, or promises of real delivery.</p></article></section>
+{% endblock %}

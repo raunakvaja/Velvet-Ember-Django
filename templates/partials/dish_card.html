@@ -1,0 +1,7 @@
+{% load static %}
+<article class="dish-card" id="dish-{{ dish.id }}">
+    <a class="dish-image" href="{% url 'menu' %}?category={{ dish.category }}#dish-{{ dish.id }}" aria-label="Browse {{ dish.name }}"><img src="{% static dish.image %}" alt="{{ dish.name }}" width="600" height="400" loading="lazy"></a>
+    <div class="dish-copy"><div class="dish-title"><h3>{{ dish.name }}</h3><strong>{{ dish.price }}</strong></div><p>{{ dish.description }}</p>
+        <div class="dish-bottom"><details><summary>Sample ingredient notes</summary><p>{{ dish.allergens }}</p></details><form action="{% url 'menu' %}?category={{ selected_category|default:'all' }}&amp;q={{ query|urlencode }}" method="post">{% csrf_token %}<input type="hidden" name="dish_id" value="{{ dish.id }}"><input type="hidden" name="return_to" value="{{ return_to|default:'menu' }}"><button class="button primary small-button" type="submit" name="action" value="add" aria-label="Add {{ dish.name }} to demo bag">Add <span aria-hidden="true">+</span></button></form></div>
+    </div>
+</article>

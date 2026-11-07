@@ -1,0 +1,199 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Velvet Ember — an elegant restaurant ordering demonstration. Sample menu, no real orders or payments.">
+    <title>{% block title %}Velvet Ember{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}?v=repair-20261106">
+</head>
+<body id="top" class="{% block body_class %}{% endblock %}">
+<a class="skip-link" href="#main">Skip to content</a>
+{% block backdrop %}{% endblock %}
+<header class="site-header shell">
+    <a class="brand" href="{% url 'home' %}" aria-label="Velvet Ember home"><span class="crest" aria-hidden="true">V<span>E</span></span><span class="wordmark">VELVET EMBER</span></a>
+    <nav aria-label="Main navigation">
+        <a href="{% url 'home' %}" {% if active == 'home' %}aria-current="page"{% endif %}>Home</a>
+        <a href="{% url 'menu' %}" {% if active == 'menu' %}aria-current="page"{% endif %}>Menu</a>
+        <a href="{% url 'about' %}" {% if active == 'about' %}aria-current="page"{% endif %}>Our story</a>
+        <a href="{% url 'services' %}" {% if active == 'services' %}aria-current="page"{% endif %}>How it works</a>
+        <a href="{% url 'contact' %}" {% if active == 'contact' %}aria-current="page"{% endif %}>Contact</a>
+    </nav>
+    <a class="bag-link"
+   href="{% url 'bag' %}"
+   {% if active == 'bag' %}aria-current="page"{% endif %}>
+    <svg aria-hidden="true" viewBox="0 0 24 28">
+        <path d="M4 8h16l2 17H2L4 8Z"/>
+        <path d="M8 10V6a4 4 0 0 1 8 0v4"/>
+    </svg>
+    <span>Bag (<span id="bag-count">{{ bag_count }}</span>)</span>
+</a>
+</header>
+<main id="main">
+    {% if notice %}
+<div class="ember-toast" id="ember-toast"
+     role="status" aria-live="polite" aria-atomic="true">
+    <span class="ember-toast-icon" aria-hidden="true">✓</span>
+    <p>{{ notice }}</p>
+    <button type="button"
+            class="ember-toast-close"
+            aria-label="Dismiss notification">×</button>
+</div>
+{% endif %}
+    {% block content %}{% endblock %}
+</main>
+<footer class="site-footer shell">
+    <div><a class="footer-brand" href="{% url 'home' %}">Velvet Ember</a><p>A little elegance. A little indulgence.<br>A restaurant experience, imagined.</p></div>
+    <div class="footer-links"><a href="{% url 'menu' %}">Explore the menu</a><a href="{% url 'services' %}">How it works</a><a href="{% url 'contact' %}">Contact</a><a href="{% url 'bag' %}">Your Bag</a></div>
+    <div class="footer-note"><p>Fictional restaurant · Sample USD prices<br>Illustrative, AI-generated food photography</p><p>No orders, deliveries, payments, or emails are processed.</p></div>
+    <small class="copyright">© {% now 'Y' %} Velvet Ember · Restaurant Concept</small>
+</footer>
+<a class="back-to-top" id="back-to-top" href="#top" aria-label="Scroll to top">↑</a>
+<script>
+(() => {
+    const button = document.getElementById('back-to-top');
+    let reachedEnd = false, pending = false;
+    function update() {
+        pending = false;
+        const page = document.scrollingElement || document.documentElement;
+        if (page.scrollTop > 100 && page.scrollHeight - innerHeight - page.scrollTop <= 200) reachedEnd = true;
+        if (page.scrollTop <= 100) reachedEnd = false;
+        button.hidden = !reachedEnd;
+    }
+    function schedule() { if (!pending) { pending = true; requestAnimationFrame(update); } }
+    addEventListener('scroll', schedule, {passive: true});
+    addEventListener('resize', schedule);
+    addEventListener('pageshow', schedule);
+    document.addEventListener('load', schedule, true);
+    update();
+})();
+</script>
+
+<script>
+(() => {
+    let toastTimer;
+    let adding = false;
+
+    function dismissToast() {
+        clearTimeout(toastTimer);
+        document.getElementById("ember-toast")?.remove();
+    }
+
+    function prepareToast(toast) {
+        toast.querySelector(".ember-toast-close")
+            ?.addEventListener("click", dismissToast);
+
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(dismissToast, 4000);
+    }
+
+    function showToast(message, success = true) {
+        dismissToast();
+
+        const toast = document.createElement("div");
+        toast.id = "ember-toast";
+        toast.className = "ember-toast";
+        toast.setAttribute("role", "status");
+        toast.setAttribute("aria-live", "polite");
+        toast.setAttribute("aria-atomic", "true");
+
+        const icon = document.createElement("span");
+        icon.className = "ember-toast-icon";
+        icon.setAttribute("aria-hidden", "true");
+        icon.textContent = success ? "✓" : "!";
+
+        const text = document.createElement("p");
+        text.textContent = message;
+
+        const close = document.createElement("button");
+        close.type = "button";
+        close.className = "ember-toast-close";
+        close.setAttribute("aria-label", "Dismiss notification");
+        close.textContent = "×";
+
+        toast.append(icon, text, close);
+        document.body.append(toast);
+        prepareToast(toast);
+    }
+
+    const initialToast = document.getElementById("ember-toast");
+    if (initialToast) prepareToast(initialToast);
+
+    document.addEventListener("submit", async (event) => {
+        const form = event.target;
+
+        if (
+            !(form instanceof HTMLFormElement) ||
+            !form.matches(".dish-bottom form")
+        ) {
+            return;
+        }
+
+        event.preventDefault();
+
+        // Prevent overlapping requests from overwriting session changes.
+        if (adding) return;
+        adding = true;
+
+        const buttons = [
+            ...document.querySelectorAll(
+                ".dish-bottom form button[type='submit']"
+            )
+        ];
+
+        const previousStates = buttons.map(button => button.disabled);
+        buttons.forEach(button => button.disabled = true);
+        form.setAttribute("aria-busy", "true");
+
+        try {
+            const body = new FormData(form);
+            body.set("action", "add");
+
+            const response = await fetch(form.getAttribute("action") || window.location.href, {
+                method: "POST",
+                credentials: "same-origin",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "Accept": "application/json"
+                },
+                body
+            });
+
+            if (
+                !response.headers.get("content-type")
+                    ?.includes("application/json")
+            ) {
+                throw new Error("Unexpected response");
+            }
+
+            const data = await response.json();
+
+            if (Number.isInteger(data.bag_count)) {
+                const count = document.getElementById("bag-count");
+                if (count) count.textContent = data.bag_count;
+            }
+
+            showToast(
+                data.message || "Unable to update the demo bag.",
+                response.ok && data.success
+            );
+        } catch {
+            showToast(
+                "Could not confirm the update. Check your bag before trying again.",
+                false
+            );
+        } finally {
+            buttons.forEach((button, index) => {
+                button.disabled = previousStates[index];
+            });
+
+            form.removeAttribute("aria-busy");
+            adding = false;
+        }
+    });
+})();
+</script>
+
+</body>
+</html>

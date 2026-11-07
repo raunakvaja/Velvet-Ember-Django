@@ -1,0 +1,21 @@
+{% extends 'base.html' %}{% load static %}
+{% block title %}Velvet Ember | Dinner, with a little drama{% endblock %}
+{% block body_class %}home-page{% endblock %}
+{% block backdrop %}
+<div class="home-scene" aria-hidden="true"><img src="{% static 'images/hero-approved.webp' %}" alt="" width="1942" height="809" fetchpriority="high"></div>
+{% endblock %}
+{% block content %}
+<section class="hero shell" aria-labelledby="hero-title">
+ <div class="hero-copy">
+  <h1 id="hero-title">Dinner, with a<br><em>little drama.</em></h1>
+  <p class="hero-description">Comforting plates. Rich flavours.<br>And a touch of indulgence.</p>
+  <div class="hero-actions"><a class="button primary" href="{% url 'menu' %}">Explore menu</a><a class="button secondary" href="{% url 'menu' %}#menu-grid">Start demo order</a></div>
+ </div>
+ <figure class="hero-inset"><img src="{% static 'images/fondant.webp' %}" alt="Dark chocolate fondant with berries" width="600" height="400"></figure>
+</section>
+<nav class="category-nav shell" aria-label="Browse menu categories">{% for key,label in categories %}<a href="{% url 'menu' %}?category={{ key }}#menu-grid" {% if key == 'all' %}aria-current="true"{% endif %}>{{ label }}</a>{% endfor %}</nav>
+<section class="signature-section shell" aria-labelledby="signature-title">
+ <h2 class="signature-title" id="signature-title">Signature plates</h2>
+ <div class="dish-grid">{% for dish in featured %}{% include 'partials/dish_card.html' with return_to='home' %}{% endfor %}</div>
+</section>
+{% endblock %}

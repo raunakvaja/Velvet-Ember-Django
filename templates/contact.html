@@ -1,0 +1,8 @@
+{% extends 'base.html' %}{% load static %}
+{% block title %}Contact | Velvet Ember{% endblock %}
+{% block body_class %}inner-page contact-page{% endblock %}
+{% block content %}
+<section class="shell page-intro"><p class="eyebrow">LET'S START A CONVERSATION</p><h1>A question. <em>A little curiosity.</em></h1><p>Explore a beautifully simple contact experience.</p></section>
+<section class="shell contact-grid"><div class="contact-editorial"><img src="{% static 'images/fondant.webp' %}" alt="Chocolate fondant with fresh berries" width="800" height="700"><div><p class="eyebrow">THE SWEETEST DETAILS MATTER</p><h2>Something<br><em>on your mind?</em></h2><p>This is a fictional restaurant demonstration. There is no real restaurant address, phone line, or monitored inbox.</p><a class="text-link" href="{% url 'services' %}">How it works ↗</a></div></div>
+<div class="glass contact-form-card" id="contact-form"><p class="eyebrow">CONTACT FORM</p><h2>A note to <em>Velvet Ember.</em></h2><p class="section-note">Use sample details. This form checks your input; it does not send or save your message.</p><form action="{% url 'contact' %}" method="post">{% csrf_token %}{% if form.errors %}<div class="form-error-summary" role="alert"><strong>Please check the highlighted fields.</strong>{{ form.non_field_errors }}</div>{% endif %}{% for field in form %}<div class="form-field"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% if field.errors %}<div class="field-errors">{{ field.errors }}</div>{% endif %}</div>{% endfor %}<button class="button primary" type="submit">Validate message →</button></form></div></section>
+{% endblock %}
